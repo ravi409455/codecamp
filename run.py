@@ -17,15 +17,22 @@ def run_solution(problem_dir):
     solution_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(solution_module)
     solution_function = getattr(solution_module, "solution")
+    compare_output = getattr(solution_module, "compare_output", None)
 
     # Run test cases
     for idx, test_case in enumerate(test_cases, start=1):
         inputs = test_case.get("input", {})
         expected_output = test_case.get("output")
 
-        output = solution_function(**inputs)
+        result = solution_function(**inputs)
 
-        if output == expected_output:
+        testcase_result = False
+        if compare_output:
+            testcase_result = compare_output(result, expected_output)
+        else:
+            testcase_result = result == expected_output
+
+        if testcase_result:
             print(f"Test case {idx} passed.")
         else:
             print(f"Test case {idx} failed.")
